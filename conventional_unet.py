@@ -21,17 +21,7 @@ from keras.layers.pooling import MaxPooling2D, GlobalMaxPool2D
 from keras.layers import concatenate, add
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.optimizers import Adam
-
-#mod1=Unet()
-#X_train,y_train,X_valid,y_valid,X_test,y_test = mod1.load_data()
-#plt.imshow(X_train[1,:,:])
-#plt.show()
-#print(X_train.shape)
-##print(X_valid.shape)
-#print(X_test.shape)
-#print(y_train.shape)
-#print(y_valid.shape)
-#print(y_test.shape)
+from keras.models import load_model
 
 class ConvUnet(Unet):
     
@@ -123,6 +113,15 @@ class ConvUnet(Unet):
         plt.savefig("learning_history.png")
     
     def ModelPredict(self,X):
+        '''Return predictions over the best model obtained during early stopping'''
+        #new_model=load_model("D:/Proyectos ML/Brain tumor/brain tumor/full.h5")
+        self.model.load_weights("D:/Proyectos ML/Brain tumor/.venv/Scripts/BestMode.h5")
         return self.model.predict(X)
+
+    def print_examples(self,y_test,post_pred,index={}):
+        '''Prints predictions'''
+        super().print_examples(y_test,post_pred,index,"ConvUnet")
+
+            
 
 

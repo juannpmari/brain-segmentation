@@ -26,7 +26,8 @@ class Unet:
             masks[i-1,:,:]  =  resize(np.array(f['cjdata'].get("tumorMask")), (self.rows, self.cols), mode = 'constant', preserve_range = True)
         X_train,X_test,y_train,y_test = train_test_split(imgs,masks,test_size=0.1,random_state=42)
         X_train,X_valid,y_train,y_valid = train_test_split(X_train,y_train,test_size=0.1,random_state=42)
-        return X_train,y_train,X_valid,y_valid,X_test,y_test
+        #return X_train,y_train,X_valid,y_valid,X_test,y_test
+        return X_train[1:,:,:],y_train[1:,:,:],X_valid,y_valid,X_test,y_test
 
     def compile(self):
         pass
@@ -41,7 +42,7 @@ class Unet:
         sum_areas=np.sum(im_true)+np.sum(im_pred)
         return 2*intersection/sum_areas
     
-    def diceMetrics(self,test_mask,predictions):
+    def diceMetrics(self,test_mask,predictions,boxplot=""):
         '''return list with dice score for each test image'''
         dice = []
         n=len(test_mask)
@@ -51,8 +52,26 @@ class Unet:
             im_pred=im_pred[:,:,0]
             im_pred[im_pred<0.5]=0
             dice.append(self.diceScore(im_true,im_pred))
+        if(boxplot!=""):
+            plt.boxplot(dice)
+            plt.savefig(f"{boxplot}")
+            plt.close()
         return dice
     
+    def post_processing(self,predictions):
+        '''Performs binarizations of the resulting masks'''
+        #Tendria que agregar una limpieza morfológica
+        predictions[predictions>0.5]=1
+        return predictions
+    
+    def print_examples(self,X_test,post_pred,name,index={}):
+        '''Prints predictions'''
+        #No funciona
+        for idx in index:
+            f, ax = plt.subplots(1, 1, sharey=True)
+            im=X_test[idx,:,:]
+            ax.imshow(im)
+            plt.savefig(f"{name}_{idx}.png")
 
 #mod1=Unet()
 #im,ma=mod1.load_data()
