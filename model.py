@@ -1,5 +1,4 @@
-#prueba sacando add
-from abc import abstractmethod
+#from abc import abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -7,6 +6,7 @@ import h5py
 
 from sklearn.model_selection import train_test_split
 from skimage.transform import resize
+from tensorflow.keras import backend as K
 
 
 
@@ -37,10 +37,10 @@ class Unet:
     def predict(self):
         pass
     
-    def diceScore(self,im_true, im_pred):
+    def diceScore(self,y_true, y_pred):
         '''Calcula el score de dice como 2*intersección/union'''
-        intersection = np.sum(im_true*im_pred)
-        sum_areas=np.sum(im_true)+np.sum(im_pred)
+        intersection = K.sum(y_true*y_pred)
+        sum_areas=K.sum(y_true)+K.sum(y_pred)
         return 2*intersection/sum_areas
     
     def diceMetrics(self,test_mask,predictions,boxplot=""):
@@ -55,7 +55,7 @@ class Unet:
             dice.append(self.diceScore(im_true,im_pred))
         if(boxplot!=""):
             plt.boxplot(dice)
-            plt.savefig(f"{boxplot}")
+            plt.savefig(f"{boxplot}.png")
             plt.close()
         return dice
     

@@ -1,35 +1,21 @@
-#prueba sacando add
-from tabnanny import verbose
+#from tabnanny import verbose
+#from tqdm import tqdm_notebook, tnrange
+#from itertools import chain
 from model import Unet
 import matplotlib.pyplot as plt
 
 import numpy as np
-
-#import os
-#import random
 import numpy as np
 
-#from tqdm import tqdm_notebook, tnrange
-#from itertools import chain
-
 import tensorflow as tf
-
-#from keras.models import Model, load_model
-#from keras.layers import Input, BatchNormalization, Activation, Dense, Dropout
-##from tensorflow.keras.layers.core import Lambda, RepeatVector, Reshape
-#from keras.layers.convolutional import Conv2D, Conv2DTranspose
-#from keras.layers.pooling import MaxPooling2D, GlobalMaxPool2D
-#from keras.layers import concatenate, add
-#from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-#from keras.optimizers import Adam
-from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, BatchNormalization, Activation, Dense, Dropout
 #from tensorflow.keras.layers.core import Lambda, RepeatVector, Reshape
 from tensorflow.keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D, concatenate
-#from tensorflow.keras.layers.pooling import MaxPooling2D, GlobalMaxPool2D
-#from tensorflow.keras.layers import concatenate, add
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from tensorflow.keras.optimizers import Adam
+
+
 
 class ConvUnet(Unet):
     
@@ -101,7 +87,8 @@ class ConvUnet(Unet):
         self.model = Model(inputs=[input_img], outputs=[outputs])
     
     def ModelCompile(self):
-        self.model.compile(optimizer = Adam(),loss="binary_crossentropy",metrics = ["accuracy"])#,run_eagerly=True)
+        #self.model.compile(optimizer = Adam(),loss="binary_crossentropy",metrics = ["accuracy"])#,run_eagerly=True)
+        self.model.compile(optimizer = Adam(),loss=[self.dice_loss],metrics = [self.diceScore])#,run_eagerly=True)
 
     def ModelFit(self,X,Y,X_valid,y_valid):
         callbacks = [
@@ -133,6 +120,14 @@ class ConvUnet(Unet):
     def print_examples(self,y_test,post_pred,index={}):
         '''Prints predictions'''
         super().print_examples(y_test,post_pred,index,"ConvUnet")
+
+    
+    def dice_loss(self,y_true,y_pred):
+        #intersection = K.sum(y_true*y_pred)
+        #sum_areas=K.sum(y_true)+K.sum(y_pred)
+        #return 2*intersection/sum_areas
+        return 1-self.diceScore(y_true,y_pred)
+
 
             
 
