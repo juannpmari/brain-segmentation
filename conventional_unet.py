@@ -1,4 +1,4 @@
-#prueba sin add
+#prueba sacando add
 from tabnanny import verbose
 from model import Unet
 import matplotlib.pyplot as plt

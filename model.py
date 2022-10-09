@@ -1,4 +1,4 @@
-#prueba sin add
+#prueba sacando add
 from abc import abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
