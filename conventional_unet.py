@@ -11,17 +11,24 @@ import numpy as np
 #from tqdm import tqdm_notebook, tnrange
 #from itertools import chain
 
-#import tensorflow as tf
+import tensorflow as tf
 
-from keras.models import Model, load_model
-from keras.layers import Input, BatchNormalization, Activation, Dense, Dropout
-from keras.layers.core import Lambda, RepeatVector, Reshape
-from keras.layers.convolutional import Conv2D, Conv2DTranspose
-from keras.layers.pooling import MaxPooling2D, GlobalMaxPool2D
-from keras.layers import concatenate, add
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from keras.optimizers import Adam
-from keras.models import load_model
+#from keras.models import Model, load_model
+#from keras.layers import Input, BatchNormalization, Activation, Dense, Dropout
+##from tensorflow.keras.layers.core import Lambda, RepeatVector, Reshape
+#from keras.layers.convolutional import Conv2D, Conv2DTranspose
+#from keras.layers.pooling import MaxPooling2D, GlobalMaxPool2D
+#from keras.layers import concatenate, add
+#from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+#from keras.optimizers import Adam
+from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.layers import Input, BatchNormalization, Activation, Dense, Dropout
+#from tensorflow.keras.layers.core import Lambda, RepeatVector, Reshape
+from tensorflow.keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D, concatenate
+#from tensorflow.keras.layers.pooling import MaxPooling2D, GlobalMaxPool2D
+#from tensorflow.keras.layers import concatenate, add
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.optimizers import Adam
 
 class ConvUnet(Unet):
     
@@ -48,7 +55,7 @@ class ConvUnet(Unet):
         x = Activation('relu')(x)
         return x
   
-    def get_unet(self, input_img, n_filters = 16, dropout = 0.1, batchnorm = True):
+    def get_unet(self, input_img, n_filters = 16, dropout = 0.2, batchnorm = True):
         # Contracting Path
         c1 = self.conv2d_block(input_img, n_filters * 1, kernel_size = 3, batchnorm = batchnorm)
         p1 = MaxPooling2D((2, 2))(c1)
@@ -99,9 +106,9 @@ class ConvUnet(Unet):
         callbacks = [
             EarlyStopping(monitor="val_loss", min_delta=0,patience=10,verbose=1), #puedo probar con otro delta
             ReduceLROnPlateau(monitor="val_loss", factor=0.1, patience=5, min_lr=0.0001,verbose=1),
-            ModelCheckpoint('BestMode.h5',verbose=1,save_best_only=True,save_weights_only=True)
+            ModelCheckpoint('BestModel.h5',verbose=1,save_best_only=True,save_weights_only=True)
             ]
-        history=self.model.fit(X,Y, batch_size=8, epochs=200, validation_data=(X_valid,y_valid), callbacks=callbacks)#epochs=200
+        history=self.model.fit(X,Y, batch_size=1, epochs=200, validation_data=(X_valid,y_valid), callbacks=callbacks)#epochs=200
         
         plt.plot(history.history["loss"],label="loss")
         plt.plot(history.history["val_loss"],label="val_loss")
@@ -112,11 +119,15 @@ class ConvUnet(Unet):
         plt.title("Learning curve")
         plt.savefig("learning_history.png")
     
-    def ModelPredict(self,X):
-        '''Return predictions over the best model obtained during early stopping'''
-        #new_model=load_model("D:/Proyectos ML/Brain tumor/brain tumor/full.h5")
-        self.model.load_weights("D:/Proyectos ML/Brain tumor/.venv/Scripts/BestMode.h5")
-        return self.model.predict(X)
+    def ModelPredict(self,X,device):
+        '''Return predictions over the best model obtained during early stopping
+            X: test set
+            device: device used for inference. Options: "gpu" or "cpu"
+        '''
+        self.model.load_weights("D:/Proyectos ML/Brain tumor/.venv/Scripts/BestModel.h5")
+        with tf.device(f'/{device}:0'):
+            return self.model.predict(X)
+            
 
     def print_examples(self,y_test,post_pred,index={}):
         '''Prints predictions'''

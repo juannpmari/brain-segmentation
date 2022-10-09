@@ -67,12 +67,9 @@ class Unet:
     def print_examples(self,X_test,post_pred,name,index={}):
         '''Prints predictions'''
         #No funciona
+        #Debería agregar la máscara traslúcida
         for idx in index:
             f, ax = plt.subplots(1, 1, sharey=True)
             im=X_test[idx,:,:]
             ax.imshow(im)
             plt.savefig(f"{name}_{idx}.png")
-
-#mod1=Unet()
-#im,ma=mod1.load_data()
-#plt.imshow(im[2,:,:])
